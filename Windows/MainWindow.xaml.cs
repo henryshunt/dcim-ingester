@@ -15,20 +15,19 @@ namespace DcimIngester.Windows
 {
     public partial class MainWindow : Window
     {
+        private const double WINDOW_MARGIN_X = 20;
+        private const double WINDOW_MARGIN_Y = 20;
+        private const uint MESSAGE_ID = 0x0401;
+
         /// <summary>
         /// The identifier returned from registering for volume change notifications.
         /// </summary>
         private uint notifyId = 0;
 
         /// <summary>
-        /// The message ID that will be passed to WndProc when the volumes on the system have changed.
-        /// </summary>
-        private const uint MESSAGE_ID = 0x0401;
-
-        /// <summary>
         /// Stores received volume change notifications. Items contain volume letter and change type.
         /// </summary>
-        private readonly BlockingCollection<(char, VolumeChangeType)> volumeNotifQueue = new();
+        private readonly BlockingCollection<(char, VolumeChangeType)> volumeNotifQueue = [];
 
         /// <summary>
         /// Thread for handling received volume change notifications.
@@ -110,7 +109,7 @@ namespace DcimIngester.Windows
         /// </summary>
         /// <param name="windowHandle">The handle of the window.</param>
         /// <returns><see langword="true"/> on success, otherwise <see langword="false"/>.</returns>
-        private bool HideWindowFromAltTab(IntPtr windowHandle)
+        private static bool HideWindowFromAltTab(IntPtr windowHandle)
         {
             int extendedStyle = NativeMethods.GetWindowLongPtr(windowHandle, NativeMethods.GWL_EXSTYLE);
 
@@ -164,16 +163,16 @@ namespace DcimIngester.Windows
         {
             if (Visibility == Visibility.Visible)
             {
-                Left = SystemParameters.WorkArea.Right - Width - 20;
-                Top = SystemParameters.WorkArea.Bottom - Height - 20;
+                Left = SystemParameters.WorkArea.Right - Width - WINDOW_MARGIN_X;
+                Top = SystemParameters.WorkArea.Bottom - Height - WINDOW_MARGIN_Y;
 
                 // WorkArea does not properly account for the taskbar at the time this event is
                 // fired, so need to reposition again after a short wait. Also, don't await because
                 // this method should return quickly.
                 Task.Delay(500).ContinueWith(t =>
                 {
-                    Left = SystemParameters.WorkArea.Right - Width - 20;
-                    Top = SystemParameters.WorkArea.Bottom - Height - 20;
+                    Left = SystemParameters.WorkArea.Right - Width - WINDOW_MARGIN_X;
+                    Top = SystemParameters.WorkArea.Bottom - Height - WINDOW_MARGIN_Y;
                 });
             }
         }
@@ -241,8 +240,8 @@ namespace DcimIngester.Windows
 
                             StackPanel1.Children.Add(item);
 
-                            Left = SystemParameters.WorkArea.Right - Width - 20;
-                            Top = SystemParameters.WorkArea.Bottom - Height - 20;
+                            Left = SystemParameters.WorkArea.Right - Width - WINDOW_MARGIN_X;
+                            Top = SystemParameters.WorkArea.Bottom - Height - WINDOW_MARGIN_Y;
                             Show();
                         });
                     }
@@ -276,8 +275,8 @@ namespace DcimIngester.Windows
         {
             StackPanel1.Children.Remove(item);
 
-            Left = SystemParameters.WorkArea.Right - Width - 20;
-            Top = SystemParameters.WorkArea.Bottom - Height - 20;
+            Left = SystemParameters.WorkArea.Right - Width - WINDOW_MARGIN_X;
+            Top = SystemParameters.WorkArea.Bottom - Height - WINDOW_MARGIN_Y;
 
             if (StackPanel1.Children.Count == 0)
                 Hide();
