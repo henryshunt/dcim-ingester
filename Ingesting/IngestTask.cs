@@ -214,5 +214,10 @@ namespace DcimIngester.Ingesting
 
             return Directory.CreateDirectory(path).FullName;
         }
+
+        /// <summary>
+        /// Specifies the status of an <see cref="IngestTask"/>.
+        /// </summary>
+        public enum IngestTaskStatus { Ready, Ingesting, Completed, Failed, Aborted }
     }
 }

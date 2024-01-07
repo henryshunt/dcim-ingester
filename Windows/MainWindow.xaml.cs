@@ -10,6 +10,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Interop;
+using static DcimIngester.Ingesting.IngestTask;
 
 namespace DcimIngester.Windows
 {

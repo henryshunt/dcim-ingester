@@ -5,6 +5,7 @@ using System.IO;
 using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
+using static DcimIngester.Ingesting.IngestTask;
 using static DcimIngester.Utilities;
 
 namespace DcimIngester.Controls
