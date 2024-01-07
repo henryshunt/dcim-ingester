@@ -26,10 +26,9 @@ namespace DcimIngester.Windows
         private const uint MESSAGE_ID = 0x0401;
 
         /// <summary>
-        /// Stores received volume change notifications. Items contain volume letter and <see langword="true"/> if 
-        /// volume was removed.
+        /// Stores received volume change notifications. Items contain volume letter and change type.
         /// </summary>
-        private readonly BlockingCollection<(char, bool)> volumeNotifQueue = new();
+        private readonly BlockingCollection<(char, VolumeChangeType)> volumeNotifQueue = new();
 
         /// <summary>
         /// Thread for handling received volume change notifications.
@@ -150,9 +149,9 @@ namespace DcimIngester.Windows
                     if (NativeMethods.SHGetPathFromIDListW(notif.dwItem1, path) && path.Length == 3)
                     {
                         if (@event == NativeMethods.SHCNE_DRIVEADD || @event == NativeMethods.SHCNE_MEDIAINSERTED)
-                            volumeNotifQueue.Add((path.ToString()[0], false));
+                            volumeNotifQueue.Add((path.ToString()[0], VolumeChangeType.Addition));
                         else if (@event == NativeMethods.SHCNE_DRIVEREMOVED || @event == NativeMethods.SHCNE_MEDIAREMOVED)
-                            volumeNotifQueue.Add((path.ToString()[0], true));
+                            volumeNotifQueue.Add((path.ToString()[0], VolumeChangeType.Removal));
                     }
                 }
             }
@@ -186,12 +185,12 @@ namespace DcimIngester.Windows
         {
             try
             {
-                // In tuple, char is volume letter, bool is true if volume was removed
+                // In tuple, char is volume letter
 
-                while (volumeNotifQueue.TryTake(
-                    out (char, bool) notification, Timeout.Infinite, queueTakeCancel.Token))
+                while (volumeNotifQueue.TryTake(out (char, VolumeChangeType) notification,
+                    Timeout.Infinite, queueTakeCancel.Token))
                 {
-                    if (notification.Item2)
+                    if (notification.Item2 == VolumeChangeType.Removal)
                         OnVolumeRemoved(notification.Item1);
                     else OnVolumeAdded(notification.Item1);
                 }
@@ -215,8 +214,8 @@ namespace DcimIngester.Windows
                 IngestItem? item = StackPanel1.Children.OfType<IngestItem>()
                     .SingleOrDefault(i => i.VolumeLetter == volumeLetter);
 
-                // Not cancelling first because it should have failed if in
-                // progress. But just in case it hasn't, don't continue
+                // Not cancelling first because it should have failed if in progress.
+                // But just in case it hasn't, don't continue
                 if (item != null)
                 {
                     if (item.Status != IngestTaskStatus.Ingesting)
@@ -300,5 +299,10 @@ namespace DcimIngester.Windows
             return StackPanel1.Children.OfType<IngestItem>().Count(
                 i => i.Status == IngestTaskStatus.Ingesting);
         }
+
+        /// <summary>
+        /// Specifies whether a volume change event was for addition or removal.
+        /// </summary>
+        private enum VolumeChangeType { Addition, Removal }
     }
 }
