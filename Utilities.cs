@@ -20,6 +20,9 @@ namespace DcimIngester
             for (i = 0; i < units.Length && bytes >= 1024; i++, bytes /= 1024)
                 bytesDouble = bytes / 1024.0;
 
+            if (bytesDouble > 100)
+                bytesDouble = Math.Round(bytesDouble);
+
             return string.Format("{0:0.#} {1}", bytesDouble, units[i]);
         }
 
