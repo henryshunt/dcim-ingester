@@ -5,6 +5,7 @@ using System.IO;
 using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Media;
 using static DcimIngester.Ingesting.IngestTask;
 using static DcimIngester.Utilities;
 
@@ -33,7 +34,7 @@ namespace DcimIngester.Controls
         /// <summary>
         /// Used to cancel the <see cref="System.Threading.Tasks.Task"/> that does the actual ingesting.
         /// </summary>
-        private CancellationTokenSource cancelSource = new();
+        private readonly CancellationTokenSource cancelSource = new();
 
         /// <summary>
         /// The directory that the first file was ingested to.
@@ -76,26 +77,18 @@ namespace DcimIngester.Controls
 
         private void UserControl_Loaded(object sender, RoutedEventArgs e)
         {
-            string label = task.Work.VolumeLabel.Length == 0 ? "unnamed" : task.Work.VolumeLabel;
             string pluralFiles = task.Work.FilesToIngest.Count > 1 ? "s" : "";
-            string pluralThem = task.Work.FilesToIngest.Count > 1 ? "them" : "it";
 
-            LabelPromptCaption.Text = string.Format(
-                "{0}: ({1}) contains {2} file{3} ({4}). Do you want to ingest {5}?",
-                task.Work.VolumeLetter, label, task.Work.FilesToIngest.Count, pluralFiles,
-                FormatBytes(task.Work.TotalIngestSize), pluralThem);
-
-            CheckBoxPromptDelete.IsChecked = Properties.Settings.Default.DeleteAfterIngest;
+            TextPrompt.Text = string.Format("{0} ({1}:) has {2} file{3} ({4}) in DCIM",
+                task.Work.VolumeLabel, task.Work.VolumeLetter, task.Work.FilesToIngest.Count, pluralFiles,
+                FormatBytes(task.Work.TotalIngestSize));
         }
 
-        private void ButtonPromptYes_Click(object sender, RoutedEventArgs e)
+        private void ButtonPromptStart_Click(object sender, RoutedEventArgs e)
         {
             task.DestinationDirectory = Properties.Settings.Default.DestDirectory;
             task.DestinationStructure = (DestStructure)Properties.Settings.Default.DestStructure;
-            task.DeleteAfterIngest = (bool)CheckBoxPromptDelete.IsChecked!;
-
-            Properties.Settings.Default.DeleteAfterIngest = task.DeleteAfterIngest;
-            Properties.Settings.Default.Save();
+            task.DeleteAfterIngest = Properties.Settings.Default.DeleteAfterIngest!;
 
             GridPrompt.Visibility = Visibility.Collapsed;
             GridIngest.Visibility = Visibility.Visible;
@@ -103,56 +96,59 @@ namespace DcimIngester.Controls
             Ingest();
         }
 
-        private void ButtonPromptNo_Click(object sender, RoutedEventArgs e)
-        {
-            Dismissed?.Invoke(this, new EventArgs());
-        }
-
         /// <summary>
         /// Executes the ingest operation, making sure the UI is updated appropriately.
         /// </summary>
         private async void Ingest()
         {
-            ButtonIngestCancel.Content = "Cancel";
+            // Restore UI in case we are retrying after a failure
+            ProgressBar1.Foreground = new SolidColorBrush(Color.FromRgb(0, 120, 212));
+            ButtonIngestCancel.Visibility = Visibility.Visible;
+            GridIngestButtons.Visibility = Visibility.Collapsed;
             ButtonIngestRetry.Visibility = Visibility.Collapsed;
+            ColDefIngestRetry.Width = new GridLength(0, GridUnitType.Pixel);
             ButtonIngestOpen.Visibility = Visibility.Collapsed;
-
-            string label = task.Work.VolumeLabel.Length == 0 ? "unnamed" : task.Work.VolumeLabel;
+            ColDefIngestOpen.Width = new GridLength(0, GridUnitType.Pixel);
 
             try
             {
                 await task.Ingest(cancelSource.Token);
 
-                LabelIngestCaption.Text = string.Format(
-                    "Ingest from {0}: ({1}) complete", task.Work.VolumeLetter, label);
+                TextIngest1.Text = string.Format("Ingest from {0} ({1}:) completed",
+                    task.Work.VolumeLabel, task.Work.VolumeLetter);
             }
             catch (OperationCanceledException)
             {
-                LabelIngestCaption.Text = string.Format(
-                    "Ingest from {0}: ({1}) cancelled", task.Work.VolumeLetter, label);
+                TextIngest1.Text = string.Format("Ingest from {0} ({1}:) cancelled",
+                    task.Work.VolumeLabel, task.Work.VolumeLetter);
+                ProgressBar1.Foreground = new SolidColorBrush(Color.FromRgb(255, 140, 0));
             }
             catch
             {
-                LabelIngestCaption.Text = string.Format(
-                    "Ingest from {0}: ({1}) failed", task.Work.VolumeLetter, label);
+                TextIngest1.Text = string.Format("Ingest from {0} ({1}:) failed",
+                    task.Work.VolumeLabel, task.Work.VolumeLetter);
+
+                ProgressBar1.Foreground = new SolidColorBrush(Color.FromRgb(209, 52, 56));
                 ButtonIngestRetry.Visibility = Visibility.Visible;
+                ColDefIngestRetry.Width = new GridLength(1, GridUnitType.Star);
             }
 
-            ButtonIngestCancel.Content = "Dismiss";
-            ButtonIngestCancel.IsEnabled = true;
+            ButtonIngestCancel.Visibility = Visibility.Collapsed;
+            GridIngestButtons.Visibility = Visibility.Visible;
 
             if (firstIngestDir != null)
+            {
                 ButtonIngestOpen.Visibility = Visibility.Visible;
+                ColDefIngestOpen.Width = new GridLength(1, GridUnitType.Star);
+            }
         }
 
         private void Task_PreFileIngested(object? sender, PreFileIngestedEventArgs e)
         {
             Application.Current.Dispatcher.Invoke(() =>
             {
-                string label = task.Work.VolumeLabel.Length == 0 ? "unnamed" : task.Work.VolumeLabel;
-
-                LabelIngestCaption.Text = string.Format("Transferring file {0} of {1} from {2}: ({3})",
-                    e.FileNumber + 1, task.Work.FilesToIngest.Count, task.Work.VolumeLetter, label);
+                TextIngest1.Text = string.Format("Transferring file {0} of {1} from {2} ({3}:)",
+                    e.FileNumber + 1, task.Work.FilesToIngest.Count, task.Work.VolumeLabel, task.Work.VolumeLetter);
             });
         }
 
@@ -172,23 +168,21 @@ namespace DcimIngester.Controls
 
             Application.Current.Dispatcher.Invoke(() =>
             {
-                LabelIngestPercent.Content = string.Format("{0}%", Math.Round(percentage));
+                TextIngestPercent.Text = string.Format("{0}%", Math.Round(percentage));
                 ProgressBar1.Value = percentage;
 
-                LabelIngestSubCaption.Text = string.Format(
-                    "{0} sorted, {1} unsorted, {2} renamed", sortedCount, unsortedCount, renamedCount);
+                TextIngest2.Text = string.Format("Sorted: {0}; Unsorted: {1}; Renamed: {2}",
+                    sortedCount, unsortedCount, renamedCount);
             });
         }
 
         private void ButtonIngestCancel_Click(object sender, RoutedEventArgs e)
         {
-            if (task.Status == IngestTaskStatus.Ingesting)
+            if (!cancelSource.IsCancellationRequested)
             {
-                ButtonIngestCancel.IsEnabled = false;
                 ButtonIngestCancel.Content = "Cancelling...";
                 cancelSource.Cancel();
             }
-            else Dismissed?.Invoke(this, new EventArgs());
         }
 
         private void ButtonIngestRetry_Click(object sender, RoutedEventArgs e)
@@ -209,6 +203,11 @@ namespace DcimIngester.Controls
                 Process.Start(psi);
             }
             catch { }
+        }
+
+        private void ButtonDismiss_Click(object sender, RoutedEventArgs e)
+        {
+            Dismissed?.Invoke(this, new EventArgs());
         }
     }
 }

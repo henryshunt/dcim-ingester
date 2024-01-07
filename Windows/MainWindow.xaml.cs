@@ -16,8 +16,8 @@ namespace DcimIngester.Windows
 {
     public partial class MainWindow : Window
     {
-        private const double WINDOW_MARGIN_X = 20;
-        private const double WINDOW_MARGIN_Y = 20;
+        private const double WINDOW_MARGIN_X = 16;
+        private const double WINDOW_MARGIN_Y = 13;
         private const uint MESSAGE_ID = 0x0401;
 
         /// <summary>
@@ -236,7 +236,7 @@ namespace DcimIngester.Windows
                         {
                             IngestItem item = new(work);
                             if (StackPanel1.Children.Count > 0)
-                                item.Margin = new Thickness(0, 20, 0, 0);
+                                item.Margin = new Thickness(0, 12, 0, 0);
                             item.Dismissed += IngestItem_Dismissed;
 
                             StackPanel1.Children.Add(item);

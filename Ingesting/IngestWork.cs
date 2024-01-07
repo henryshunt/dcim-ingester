@@ -18,12 +18,12 @@ namespace DcimIngester.Ingesting
         /// <summary>
         /// Gets the label of the volume to ingest from.
         /// </summary>
-        public readonly string VolumeLabel;
+        public readonly string VolumeLabel = "Unnamed";
 
         /// <summary>
         /// The paths of the files to ingest from the volume.
         /// </summary>
-        private readonly List<string> filesToIngest = new();
+        private readonly List<string> filesToIngest = [];
 
         /// <summary>
         /// Gets the paths of the files to ingest from the volume.
@@ -55,7 +55,10 @@ namespace DcimIngester.Ingesting
                 throw new ArgumentException(nameof(volumeLetter) + " must be a letter");
 
             VolumeLetter = volumeLetter;
-            VolumeLabel = new DriveInfo(VolumeLetter.ToString() + ":").VolumeLabel;
+
+            string label = new DriveInfo(VolumeLetter.ToString() + ":").VolumeLabel;
+            if (label.Length > 0)
+                VolumeLabel = label;
         }
 
         /// <summary>
