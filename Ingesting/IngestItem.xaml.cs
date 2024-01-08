@@ -2,6 +2,7 @@
 using System;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
@@ -37,24 +38,14 @@ namespace DcimIngester.Controls
         private readonly CancellationTokenSource cancelSource = new();
 
         /// <summary>
-        /// The directory that the first file was ingested to.
+        /// The directory that the first file was ingested into.
         /// </summary>
         private string? firstIngestDir = null;
 
         /// <summary>
         /// The number of ingested files that were sorted into directories by date taken.
         /// </summary>
-        private int sortedCount = 0;
-
-        /// <summary>
-        /// The number of ingested files that were sorted into an "unsorted" folder.
-        /// </summary>
-        private int unsortedCount = 0;
-
-        /// <summary>
-        /// The number of ingested files that were renamed to avoid a duplicate file name.
-        /// </summary>
-        private int renamedCount = 0;
+        private int ingestedCount = 0;
 
         /// <summary>
         /// Occurs when the user dismisses the item.
@@ -77,11 +68,11 @@ namespace DcimIngester.Controls
 
         private void UserControl_Loaded(object sender, RoutedEventArgs e)
         {
-            string pluralFiles = task.Work.FilesToIngest.Count > 1 ? "s" : "";
-
-            TextPrompt.Text = string.Format("{0} ({1}:) has {2} file{3} ({4}) in DCIM",
-                task.Work.VolumeLabel, task.Work.VolumeLetter, task.Work.FilesToIngest.Count, pluralFiles,
-                FormatBytes(task.Work.TotalIngestSize));
+            TextPrompt.Text = string.Format(
+                "{0} ({1}:) has {2} file{3} ({4}) in DCIM. Do you want to ingest them?",
+                task.Work.VolumeLabel, task.Work.VolumeLetter, task.Work.FilesToIngest.Count,
+                GetPluralSuffix(task.Work.FilesToIngest.Count),
+                FormatStorageSize(task.Work.TotalIngestSize));
         }
 
         private void ButtonPromptStart_Click(object sender, RoutedEventArgs e)
@@ -102,6 +93,10 @@ namespace DcimIngester.Controls
         private async void Ingest()
         {
             // Restore UI in case we are retrying after a failure
+            TextIngest1.Text = string.Format("Ingesting {0} file{1} from {2} ({3}:)",
+                task.Work.FilesToIngest.Count, GetPluralSuffix(task.Work.FilesToIngest.Count),
+                task.Work.VolumeLabel, task.Work.VolumeLetter);
+
             ProgressBar1.Foreground = new SolidColorBrush(Color.FromRgb(0, 120, 212));
             ButtonIngestCancel.Visibility = Visibility.Visible;
             GridIngestButtons.Visibility = Visibility.Collapsed;
@@ -127,10 +122,14 @@ namespace DcimIngester.Controls
             {
                 TextIngest1.Text = string.Format("Ingest from {0} ({1}:) failed",
                     task.Work.VolumeLabel, task.Work.VolumeLetter);
-
                 ProgressBar1.Foreground = new SolidColorBrush(Color.FromRgb(209, 52, 56));
                 ButtonIngestRetry.Visibility = Visibility.Visible;
                 ColDefIngestRetry.Width = new GridLength(1, GridUnitType.Star);
+            }
+            finally
+            {
+                TextIngest2.Text = string.Format("Transferred {0} file{1}",
+                    ingestedCount, GetPluralSuffix(ingestedCount));
             }
 
             ButtonIngestCancel.Visibility = Visibility.Collapsed;
@@ -147,32 +146,24 @@ namespace DcimIngester.Controls
         {
             Application.Current.Dispatcher.Invoke(() =>
             {
-                TextIngest1.Text = string.Format("Transferring file {0} of {1} from {2} ({3}:)",
-                    e.FileNumber + 1, task.Work.FilesToIngest.Count, task.Work.VolumeLabel, task.Work.VolumeLetter);
+                TextIngest2.Text = string.Format("Transferring {0}",
+                    Path.GetFileName(task.Work.FilesToIngest.ElementAt(e.FileIndex)));
             });
         }
 
         private void Task_PostFileIngested(object? sender, PostFileIngestedEventArgs e)
         {
+            ingestedCount++;
+
             if (firstIngestDir == null)
                 firstIngestDir = Path.GetDirectoryName(e.NewFilePath);
 
-            if (e.IsUnsorted)
-                unsortedCount++;
-            else sortedCount++;
-
-            if (e.IsRenamed)
-                renamedCount++;
-
-            double percentage = ((double)(e.FileNumber + 1) / task.Work.FilesToIngest.Count) * 100;
+            double percentage = ((double)(e.FileIndex + 1) / task.Work.FilesToIngest.Count) * 100;
 
             Application.Current.Dispatcher.Invoke(() =>
             {
                 TextIngestPercent.Text = string.Format("{0}%", Math.Round(percentage));
                 ProgressBar1.Value = percentage;
-
-                TextIngest2.Text = string.Format("Sorted: {0}; Unsorted: {1}; Renamed: {2}",
-                    sortedCount, unsortedCount, renamedCount);
             });
         }
 

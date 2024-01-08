@@ -10,7 +10,7 @@ namespace DcimIngester.Ingesting
         /// <summary>
         /// The index of the file in the list of files to ingest.
         /// </summary>
-        public int FileNumber { get; private set; }
+        public int FileIndex { get; private set; }
 
         /// <summary>
         /// Initialises a new instance of the <see cref="PreFileIngestedEventArgs"/> class.
@@ -18,7 +18,7 @@ namespace DcimIngester.Ingesting
         /// <param name="fileNumber">The index of the file in the list of files to ingest.</param>
         public PreFileIngestedEventArgs(int fileNumber)
         {
-            FileNumber = fileNumber;
+            FileIndex = fileNumber;
         }
     }
 }

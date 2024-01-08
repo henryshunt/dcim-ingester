@@ -43,7 +43,7 @@ namespace DcimIngester.Ingesting
         /// <summary>
         /// The index of the current or next file to be ingested.
         /// </summary>
-        private int lastIngested = 0;
+        private int lastIngestedPos = 0;
 
         /// <summary>
         /// Occurs when the ingest of an individual file begins.
@@ -86,21 +86,18 @@ namespace DcimIngester.Ingesting
                 {
                     Status = IngestTaskStatus.Ingesting;
 
-                    for (int i = lastIngested; i < Work.FilesToIngest.Count; i++)
+                    for (int i = lastIngestedPos; i < Work.FilesToIngest.Count; i++)
                     {
-                        string path = Work.FilesToIngest.ElementAt(i);
                         PreFileIngested?.Invoke(this, new PreFileIngestedEventArgs(i));
 
-                        IngestFile(path, out string newPath, out bool unsorted, out bool renamed);
-
+                        string destPath = IngestFile(Work.FilesToIngest.ElementAt(i));
                         if (DeleteAfterIngest)
-                            File.Delete(path);
+                            File.Delete(Work.FilesToIngest.ElementAt(i));
+                        lastIngestedPos++;
 
-                        lastIngested++;
+                        PostFileIngested?.Invoke(this, new PostFileIngestedEventArgs(destPath, i));
 
-                        PostFileIngested?.Invoke(this, new PostFileIngestedEventArgs(newPath, i, unsorted, renamed));
-
-                        // Only abort if the file we just ingested was not the final file
+                        // Only cancel if the file we just ingested was not the final file
                         if (cancelToken.IsCancellationRequested && i < Work.FilesToIngest.Count - 1)
                         {
                             Status = IngestTaskStatus.Aborted;
@@ -120,13 +117,11 @@ namespace DcimIngester.Ingesting
 
         /// <summary>
         /// Ingests a file into the appropriate destination directory based on the date in the EXIF data. If no date is
-        /// available then the file is ingested into an "unsorted" directory.
+        /// available then the file is ingested into an "Unsorted" directory.
         /// </summary>
         /// <param name="path">The file to ingest.</param>
-        /// <param name="newPath">Contains the new path of the ingested file.</param>
-        /// <param name="unsorted">Indicates whether the file was ingested into an "unsorted" directory.</param>
-        /// <param name="renamed">Indicates whether the file name was changed to avoid a clash.</param>
-        private void IngestFile(string path, out string newPath, out bool unsorted, out bool renamed)
+        /// <returns>The new path of the ingested file</returns>
+        private string IngestFile(string path)
         {
             DateTime? dateTaken = GetDateTaken(path);
             string destination = "";
@@ -148,17 +143,11 @@ namespace DcimIngester.Ingesting
 
                 destination = Path.Combine(DestinationDirectory,
                     string.Format(destination, dateTaken?.Year, dateTaken?.Month, dateTaken?.Day));
-
-                unsorted = false;
             }
-            else
-            {
-                destination = Path.Combine(DestinationDirectory, "Unsorted");
-                unsorted = true;
-            }
+            else destination = Path.Combine(DestinationDirectory, "Unsorted");
 
             destination = CreateDestination(destination);
-            CopyFile(path, destination, out newPath, out renamed);
+            return CopyFile(path, destination);
         }
 
         /// <summary>
@@ -191,7 +180,7 @@ namespace DcimIngester.Ingesting
 
         /// <summary>
         /// Creates a directory if it does not exist. If the directory exists but has additional text (following a
-        /// space), appended to the final directory in the path, it is not created.
+        /// space) appended to the name of the final directory in the path then it is not created.
         /// </summary>
         /// <param name="path">The directory to create.</param>
         /// <returns>The created or already existing directory.</returns>
@@ -216,8 +205,59 @@ namespace DcimIngester.Ingesting
         }
 
         /// <summary>
+        /// Copies a file to a directory. If the file already exists in the directory and the contents are not identical
+        /// then a counter is added to the file name.
+        /// </summary>
+        /// <param name="sourcePath">The file to copy.</param>
+        /// <param name="destDirectory">The directory to copy the file to.</param>
+        /// <returns>The destination file path, which may be different if the file was renamed to deduplicate.</returns>
+        public static string CopyFile(string sourcePath, string destDirectory)
+        {
+            int duplicateCount = 0;
+            string destFileName = "";
+
+            // If file already exists then add incrementing counter until file doesn't exist
+            while (true)
+            {
+                try
+                {
+                    if (duplicateCount == 0)
+                        destFileName = Path.GetFileName(sourcePath);
+                    else if (duplicateCount == 1)
+                    {
+                        destFileName = string.Format("{0} - Copy{2}", Path.GetFileNameWithoutExtension(sourcePath),
+                            duplicateCount, Path.GetExtension(sourcePath));
+                    }
+                    else
+                    {
+                        destFileName = string.Format("{0} - Copy ({1}){2}", Path.GetFileNameWithoutExtension(sourcePath),
+                            duplicateCount, Path.GetExtension(sourcePath));
+                    }
+
+                    File.Copy(sourcePath, Path.Combine(destDirectory, destFileName));
+                    return Path.Combine(destDirectory, destFileName);
+                }
+                catch (IOException ex)
+                when (ex.HResult == unchecked((int)0x80070050) || ex.HResult == unchecked((int)0x80070050))
+                {
+                    // File already exists
+
+                    if (AreFilesEqual(sourcePath, Path.Combine(destDirectory, destFileName)))
+                        return Path.Combine(destDirectory, destFileName);
+                    else duplicateCount++;
+                }
+            }
+        }
+
+
+        /// <summary>
         /// Specifies the status of an <see cref="IngestTask"/>.
         /// </summary>
         public enum IngestTaskStatus { Ready, Ingesting, Completed, Failed, Aborted }
+
+        /// <summary>
+        /// Specifies the destination subfolder structure to ingest files into.
+        /// </summary>
+        public enum DestStructure { Year_Month_Day, Year_YearMonthDay, YearMonthDay }
     }
 }

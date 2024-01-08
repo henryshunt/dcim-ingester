@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Diagnostics;
 using System.IO;
 
 namespace DcimIngester
@@ -7,13 +6,23 @@ namespace DcimIngester
     public static class Utilities
     {
         /// <summary>
+        /// Returns "s" or <see cref="string.Empty"/> depending on if a number is singular or plural.
+        /// </summary>
+        /// <param name="number">The number to use.</param>
+        /// <returns>The corresponding suffix for the value of <paramref name="number"/>.</returns>
+        public static string GetPluralSuffix(int number)
+        {
+            return number != 1 ? "s" : string.Empty;
+        }
+
+        /// <summary>
         /// Formats a numerical storage size into a string with units based on the magnitude of the value.
         /// </summary>
         /// <param name="bytes">The storage size in bytes.</param>
         /// <returns>The formatted storage size with units based on the magnitude of the value.</returns>
-        public static string FormatBytes(long bytes)
+        public static string FormatStorageSize(long bytes)
         {
-            string[] units = { "B", "KB", "MB", "GB", "TB" };
+            string[] units = ["B", "KB", "MB", "GB", "TB"];
             double bytesDouble = bytes;
 
             int i;
@@ -27,51 +36,42 @@ namespace DcimIngester
         }
 
         /// <summary>
-        /// Copies a file to a directory. If the file already exists in the directory then a counter is added to the
-        /// file name.
+        /// Determines whether the size and contents of two files are identical.
         /// </summary>
-        /// <param name="sourcePath">The file to copy.</param>
-        /// <param name="destDirectory">The directory to copy the file to.</param>
-        /// <param name="newPath">Contains the new path of the copied file.</param>
-        /// <param name="renamed">Indicates whether the file name was changed to avoid duplication in the
-        /// destination.</param>
-        public static void CopyFile(string sourcePath, string destDirectory, out string newPath, out bool renamed)
+        /// <param name="path1">The first file to compare.</param>
+        /// <param name="path2">The second file to compare.</param>
+        /// <returns><see langword="true"/> if the files are identical, otherwise <see langword="false"/>.</returns>
+        public static bool AreFilesEqual(string path1, string path2)
         {
-            int duplicates = 0;
+            if (string.Equals(path1, path2, StringComparison.OrdinalIgnoreCase))
+                return true;
 
-            while (true)
+            FileInfo fileInfo1 = new(path1);
+            FileInfo fileInfo2 = new(path2);
+
+            if (fileInfo1.Length != fileInfo2.Length)
+                return false;
+
+            const int BYTES_TO_READ = sizeof(Int64); // Faster than one byte at a time
+            long chunkCount = (long)Math.Ceiling((double)fileInfo1.Length / BYTES_TO_READ);
+
+            using (FileStream stream1 = fileInfo1.OpenRead())
+            using (FileStream stream2 = fileInfo2.OpenRead())
             {
-                try
+                byte[] data1 = new byte[BYTES_TO_READ];
+                byte[] data2 = new byte[BYTES_TO_READ];
+
+                for (int i = 0; i < chunkCount; i++)
                 {
-                    string fileName;
+                    stream1.Read(data1, 0, BYTES_TO_READ);
+                    stream2.Read(data2, 0, BYTES_TO_READ);
 
-                    if (duplicates == 0)
-                        fileName = Path.GetFileName(sourcePath);
-                    else if (duplicates == 1)
-                    {
-                        fileName = string.Format("{0} - Copy{2}", Path.GetFileNameWithoutExtension(sourcePath),
-                            duplicates, Path.GetExtension(sourcePath));
-                    }
-                    else
-                    {
-                        fileName = string.Format("{0} - Copy ({1}){2}", Path.GetFileNameWithoutExtension(sourcePath),
-                            duplicates, Path.GetExtension(sourcePath));
-                    }
-
-                    string destination = Path.Combine(destDirectory, fileName);
-                    File.Copy(sourcePath, destination);
-
-                    newPath = destination;
-                    renamed = duplicates != 0;
-                    break;
-                }
-                catch (IOException ex)
-                when (ex.HResult == unchecked((int)0x80070050) || ex.HResult == unchecked((int)0x80070050))
-                {
-                    // File already exists
-                    duplicates++;
+                    if (BitConverter.ToInt64(data1, 0) != BitConverter.ToInt64(data2, 0))
+                        return false;
                 }
             }
+
+            return true;
         }
     }
 }
