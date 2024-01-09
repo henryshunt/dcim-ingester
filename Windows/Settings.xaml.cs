@@ -15,6 +15,7 @@ namespace DcimIngester.Windows
         {
             TextBoxDestDir.Text = Properties.Settings.Default.DestDirectory;
             ComboBoxDestStruc.SelectedIndex = Properties.Settings.Default.DestStructure;
+            CheckBoxDelete.IsChecked = Properties.Settings.Default.DeleteAfterIngest;
         }
 
         private void TextBoxDestDir_TextChanged(object sender, TextChangedEventArgs e)
@@ -35,11 +36,20 @@ namespace DcimIngester.Windows
             ValidateFields();
         }
 
+        private void CheckBoxDelete_CheckedChanged(object sender, RoutedEventArgs e)
+        {
+            ValidateFields();
+        }
+
+        /// <summary>
+        /// Enables or disables the save button depending on whether the field values have changed and are valid.
+        /// </summary>
         private void ValidateFields()
         {
             if ((TextBoxDestDir.Text.Length > 0 &&
                 TextBoxDestDir.Text != Properties.Settings.Default.DestDirectory) ||
-                ComboBoxDestStruc.SelectedIndex != Properties.Settings.Default.DestStructure)
+                ComboBoxDestStruc.SelectedIndex != Properties.Settings.Default.DestStructure ||
+                CheckBoxDelete.IsChecked != Properties.Settings.Default.DeleteAfterIngest)
             {
                 ButtonSave.IsEnabled = true;
             }
@@ -50,6 +60,7 @@ namespace DcimIngester.Windows
         {
             Properties.Settings.Default.DestDirectory = TextBoxDestDir.Text;
             Properties.Settings.Default.DestStructure = ComboBoxDestStruc.SelectedIndex;
+            Properties.Settings.Default.DeleteAfterIngest = (bool)CheckBoxDelete.IsChecked!;
             Properties.Settings.Default.Save();
 
             Close();

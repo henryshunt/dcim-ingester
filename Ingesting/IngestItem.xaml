@@ -4,6 +4,67 @@
              
              Width="364" Height="140" FontSize="14" Foreground="White" Loaded="UserControl_Loaded">
 
+    <UserControl.Resources>
+        <Style x:Key="FocusVisual">
+            <Setter Property="Control.Template">
+                <Setter.Value>
+                    <ControlTemplate>
+                        <Rectangle Margin="2" SnapsToDevicePixels="true" Stroke="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}" StrokeThickness="1" StrokeDashArray="1 2"/>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <SolidColorBrush x:Key="NotifButton.Static.Background" Color="#FF292929"/>
+        <SolidColorBrush x:Key="NotifButton.Static.Border" Color="#FF3D3D3D"/>
+        <SolidColorBrush x:Key="NotifButton.Static.Foreground" Color="White"/>
+        <SolidColorBrush x:Key="NotifButton.MouseOver.Background" Color="#FF2F2F2F"/>
+        <SolidColorBrush x:Key="NotifButton.MouseOver.Border" Color="#FF434343"/>
+        <SolidColorBrush x:Key="NotifButton.Pressed.Background" Color="#FF232323"/>
+        <SolidColorBrush x:Key="NotifButton.Pressed.Border" Color="#FF2A2A2A"/>
+        <SolidColorBrush x:Key="NotifButton.Pressed.Foreground" Color="#FFCBCBCB"/>
+        <SolidColorBrush x:Key="NotifButton.Disabled.Background" Color="#FF5A5A5A"/>
+        <SolidColorBrush x:Key="NotifButton.Disabled.Foreground" Color="#FFAAAAAA"/>
+
+        <Style x:Key="NotifButtonStyle" TargetType="{x:Type Button}">
+            <Setter Property="Height" Value="32"/>
+            <Setter Property="Padding" Value="0,0,0,2"/>
+            <Setter Property="Background" Value="{StaticResource NotifButton.Static.Background}"/>
+            <Setter Property="BorderBrush" Value="{StaticResource NotifButton.Static.Border}"/>
+            <Setter Property="Foreground" Value="{StaticResource NotifButton.Static.Foreground}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="FocusVisualStyle" Value="{StaticResource FocusVisual}"/>
+
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type Button}">
+                        <Border x:Name="border" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" Background="{TemplateBinding Background}" CornerRadius="4" SnapsToDevicePixels="true">
+                            <ContentPresenter x:Name="contentPresenter" Focusable="False" HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" Margin="{TemplateBinding Padding}" RecognizesAccessKey="True" SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
+                        </Border>
+
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="true">
+                                <Setter Property="Background" TargetName="border" Value="{StaticResource NotifButton.MouseOver.Background}"/>
+                                <Setter Property="BorderBrush" TargetName="border" Value="{StaticResource NotifButton.MouseOver.Border}"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="true">
+                                <Setter Property="Background" TargetName="border" Value="{StaticResource NotifButton.Pressed.Background}"/>
+                                <Setter Property="BorderBrush" TargetName="border" Value="{StaticResource NotifButton.Pressed.Border}"/>
+                                <Setter Property="TextElement.Foreground" TargetName="contentPresenter" Value="{StaticResource NotifButton.Pressed.Foreground}"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="false">
+                                <Setter Property="Background" TargetName="border" Value="{StaticResource NotifButton.Disabled.Background}"/>
+                                <Setter Property="TextElement.Foreground" TargetName="contentPresenter" Value="{StaticResource NotifButton.Disabled.Foreground}"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </UserControl.Resources>
+
     <Border Background="#FF1C1C1C" BorderThickness="1" BorderBrush="#FF525252" CornerRadius="8">
         <Grid Margin="15">
             <Grid x:Name="GridPrompt">
@@ -16,8 +77,8 @@
                         <ColumnDefinition/>
                     </Grid.ColumnDefinitions>
 
-                    <Button x:Name="ButtonPromptStart" Style="{DynamicResource ButtonStyle}" Content="Ingest Files" Click="ButtonPromptStart_Click"/>
-                    <Button x:Name="ButtonPromptDismiss" Style="{DynamicResource ButtonStyle}" Content="Dismiss" Click="ButtonDismiss_Click" Grid.Column="2"/>
+                    <Button x:Name="ButtonPromptStart" Style="{DynamicResource NotifButtonStyle}" Content="Ingest Files" Click="ButtonPromptStart_Click"/>
+                    <Button x:Name="ButtonPromptDismiss" Style="{DynamicResource NotifButtonStyle}" Content="Dismiss" Click="ButtonDismiss_Click" Grid.Column="2"/>
                 </Grid>
             </Grid>
 
@@ -38,7 +99,7 @@
                     </Grid>
                 </StackPanel>
 
-                <Button x:Name="ButtonIngestCancel" Style="{DynamicResource ButtonStyle}" Content="Cancel" Click="ButtonIngestCancel_Click" VerticalAlignment="Bottom"/>
+                <Button x:Name="ButtonIngestCancel" Style="{DynamicResource NotifButtonStyle}" Content="Cancel" Click="ButtonIngestCancel_Click" VerticalAlignment="Bottom"/>
 
                 <Grid x:Name="GridIngestButtons" VerticalAlignment="Bottom" Visibility="Collapsed">
                     <Grid.ColumnDefinitions>
@@ -47,9 +108,9 @@
                         <ColumnDefinition/>
                     </Grid.ColumnDefinitions>
 
-                    <Button x:Name="ButtonIngestRetry" Style="{DynamicResource ButtonStyle}" Content="Retry" Margin="0,0,8,0" Click="ButtonIngestRetry_Click" Visibility="Collapsed"/>
-                    <Button x:Name="ButtonIngestOpen" Style="{DynamicResource ButtonStyle}" Content="Open Folder" Margin="0,0,8,0" Click="ButtonIngestOpen_Click" Visibility="Collapsed" Grid.Column="1"/>
-                    <Button x:Name="ButtonIngestDismiss" Style="{DynamicResource ButtonStyle}" Content="Dismiss" Click="ButtonDismiss_Click" Grid.Column="2"/>
+                    <Button x:Name="ButtonIngestRetry" Style="{DynamicResource NotifButtonStyle}" Content="Retry" Margin="0,0,8,0" Click="ButtonIngestRetry_Click" Visibility="Collapsed"/>
+                    <Button x:Name="ButtonIngestOpen" Style="{DynamicResource NotifButtonStyle}" Content="Open Folder" Margin="0,0,8,0" Click="ButtonIngestOpen_Click" Visibility="Collapsed" Grid.Column="1"/>
+                    <Button x:Name="ButtonIngestDismiss" Style="{DynamicResource NotifButtonStyle}" Content="Dismiss" Click="ButtonDismiss_Click" Grid.Column="2"/>
                 </Grid>
             </Grid>
         </Grid>
