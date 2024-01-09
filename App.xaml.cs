@@ -39,6 +39,7 @@ namespace DcimIngester
             {
                 DcimIngester.Properties.Settings.Default.DestDirectory =
                     Environment.GetFolderPath(Environment.SpecialFolder.MyPictures);
+                DcimIngester.Properties.Settings.Default.Save();
             }
 
             mainWindow = new MainWindow();
