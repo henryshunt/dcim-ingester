@@ -1,6 +1,6 @@
-﻿using System.Windows;
+﻿using Microsoft.Win32;
+using System.Windows;
 using System.Windows.Controls;
-using FolderBrowserDialog = System.Windows.Forms.FolderBrowserDialog;
 
 namespace DcimIngester.Windows
 {
@@ -25,10 +25,10 @@ namespace DcimIngester.Windows
 
         private void ButtonBrowseDest_Click(object sender, RoutedEventArgs e)
         {
-            FolderBrowserDialog folderDialog = new();
+            OpenFolderDialog dialog = new();
 
-            if (folderDialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
-                TextBoxDestDir.Text = folderDialog.SelectedPath;
+            if (dialog.ShowDialog() == true)
+                TextBoxDestDir.Text = dialog.FolderName;
         }
 
         private void ComboBoxDestStruc_SelectionChanged(object sender, SelectionChangedEventArgs e)
