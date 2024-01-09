@@ -34,8 +34,12 @@ namespace DcimIngester
 
             taskbarIcon.Visibility = Visibility.Visible;
 
+            // Set destination to user's pictures directory on first launch
             if (DcimIngester.Properties.Settings.Default.DestDirectory.Length == 0)
-                MenuItemSettings_Click(this, new RoutedEventArgs());
+            {
+                DcimIngester.Properties.Settings.Default.DestDirectory =
+                    Environment.GetFolderPath(Environment.SpecialFolder.MyPictures);
+            }
 
             mainWindow = new MainWindow();
 
