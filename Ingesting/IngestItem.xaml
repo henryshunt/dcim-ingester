@@ -7,7 +7,7 @@
     <Border Background="#FF1C1C1C" BorderThickness="1" BorderBrush="#FF525252" CornerRadius="8">
         <Grid Margin="15">
             <Grid x:Name="GridPrompt">
-                <TextBlock x:Name="TextPrompt" TextWrapping="Wrap" VerticalAlignment="Top" Foreground="#FFEBEBEB"/>
+                <TextBlock x:Name="TextPrompt" TextWrapping="Wrap" VerticalAlignment="Top"/>
 
                 <Grid VerticalAlignment="Bottom">
                     <Grid.ColumnDefinitions>
@@ -34,7 +34,7 @@
                         </Grid.ColumnDefinitions>
 
                         <TextBlock x:Name="TextIngest2" VerticalAlignment="Top" Foreground="#FFCBCBCB"/>
-                        <TextBlock x:Name="TextIngestPercent" TextAlignment="Right" VerticalAlignment="Top" HorizontalAlignment="Right" Text="0%" Foreground="#FFCBCBCB" Grid.Column="2"/>
+                        <TextBlock x:Name="TextIngestPercent" Text="0%" Foreground="#FFCBCBCB" Grid.Column="2"/>
                     </Grid>
                 </StackPanel>
 

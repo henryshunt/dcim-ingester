@@ -92,13 +92,14 @@ namespace DcimIngester.Controls
         /// </summary>
         private async void Ingest()
         {
-            // Restore UI in case we are retrying after a failure
             TextIngest1.Text = string.Format("Ingesting {0} file{1} from {2} ({3}:)",
                 task.Work.FilesToIngest.Count, GetPluralSuffix(task.Work.FilesToIngest.Count),
                 task.Work.VolumeLabel, task.Work.VolumeLetter);
 
+            // Restore UI in case we are retrying after a failure
             ProgressBar1.Foreground = new SolidColorBrush(Color.FromRgb(0, 120, 212));
             ButtonIngestCancel.Visibility = Visibility.Visible;
+            ButtonIngestCancel.IsEnabled = true;
             GridIngestButtons.Visibility = Visibility.Collapsed;
             ButtonIngestRetry.Visibility = Visibility.Collapsed;
             ColDefIngestRetry.Width = new GridLength(0, GridUnitType.Pixel);
@@ -172,6 +173,7 @@ namespace DcimIngester.Controls
             if (!cancelSource.IsCancellationRequested)
             {
                 ButtonIngestCancel.Content = "Cancelling...";
+                ButtonIngestCancel.IsEnabled = false;
                 cancelSource.Cancel();
             }
         }
