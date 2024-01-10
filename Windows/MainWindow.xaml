@@ -4,5 +4,5 @@
         
         Title="DCIM Ingester" Width="364" AllowsTransparency="True" Background="Transparent" WindowStyle="None" ShowInTaskbar="False" Topmost="True" Height="{Binding ActualHeight, ElementName=StackPanel1}" Closing="Window_Closing" Loaded="Window_Loaded" Icon="../Icon.ico">
 
-    <StackPanel x:Name="StackPanel1" VerticalAlignment="Bottom"/>
+    <StackPanel x:Name="itemsStackPanel" VerticalAlignment="Bottom"/>
 </Window>

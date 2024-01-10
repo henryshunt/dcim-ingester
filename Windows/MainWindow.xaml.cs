@@ -208,7 +208,7 @@ namespace DcimIngester.Windows
 
             Application.Current.Dispatcher.Invoke(() =>
             {
-                IngestItem? item = StackPanel1.Children.OfType<IngestItem>()
+                IngestItem? item = itemsStackPanel.Children.OfType<IngestItem>()
                     .SingleOrDefault(i => i.VolumeLetter == volumeLetter);
 
                 // Not cancelling first because it should have failed if in progress.
@@ -232,11 +232,11 @@ namespace DcimIngester.Windows
                         Application.Current.Dispatcher.Invoke(() =>
                         {
                             IngestItem item = new(work);
-                            if (StackPanel1.Children.Count > 0)
+                            if (itemsStackPanel.Children.Count > 0)
                                 item.Margin = new Thickness(0, 12, 0, 0);
                             item.Dismissed += IngestItem_Dismissed;
 
-                            StackPanel1.Children.Add(item);
+                            itemsStackPanel.Children.Add(item);
 
                             Left = SystemParameters.WorkArea.Right - Width - WINDOW_MARGIN_X;
                             Top = SystemParameters.WorkArea.Bottom - Height - WINDOW_MARGIN_Y;
@@ -257,7 +257,7 @@ namespace DcimIngester.Windows
             Application.Current.Dispatcher.Invoke(() =>
             {
                 // Only remove items that have not been started
-                IngestItem? item = StackPanel1.Children.OfType<IngestItem>().SingleOrDefault(
+                IngestItem? item = itemsStackPanel.Children.OfType<IngestItem>().SingleOrDefault(
                     i => i.VolumeLetter == volumeLetter && i.Status == IngestTaskStatus.Ready);
 
                 if (item != null)
@@ -271,12 +271,12 @@ namespace DcimIngester.Windows
         /// <param name="item">The item to remove.</param>
         private void RemoveItem(IngestItem item)
         {
-            StackPanel1.Children.Remove(item);
+            itemsStackPanel.Children.Remove(item);
 
             Left = SystemParameters.WorkArea.Right - Width - WINDOW_MARGIN_X;
             Top = SystemParameters.WorkArea.Bottom - Height - WINDOW_MARGIN_Y;
 
-            if (StackPanel1.Children.Count == 0)
+            if (itemsStackPanel.Children.Count == 0)
                 Hide();
         }
 
@@ -284,7 +284,7 @@ namespace DcimIngester.Windows
         {
             // Need to check because it may be possible for a volume removal notification to remove the
             // item being dismissed between the dismiss button being clicked and this code executing
-            if (StackPanel1.Children.Contains((IngestItem)sender!))
+            if (itemsStackPanel.Children.Contains((IngestItem)sender!))
                 RemoveItem((IngestItem)sender!);
         }
 
@@ -293,7 +293,7 @@ namespace DcimIngester.Windows
         /// </summary>
         private int GetActiveIngestCount()
         {
-            return StackPanel1.Children.OfType<IngestItem>().Count(
+            return itemsStackPanel.Children.OfType<IngestItem>().Count(
                 i => i.Status == IngestTaskStatus.Ingesting);
         }
 

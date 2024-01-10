@@ -18,12 +18,13 @@ namespace DcimIngester
 
         private bool isSettingsOpen = false;
 
+
         private void Application_Startup(object sender, StartupEventArgs e)
         {
             taskbarIcon = new()
             {
                 ToolTipText = "DCIM Ingester",
-                ContextMenu = (ContextMenu)FindResource("TaskbarIconContextMenu")
+                ContextMenu = (ContextMenu)FindResource("TrayContextMenu")
             };
 
             using (Stream stream = GetResourceStream(new Uri(
@@ -49,7 +50,7 @@ namespace DcimIngester
             mainWindow.Hide();
         }
 
-        private void MenuItemSettings_Click(object sender, RoutedEventArgs e)
+        private void SettingsMenuItem_Click(object sender, RoutedEventArgs e)
         {
             if (!isSettingsOpen)
             {
@@ -64,7 +65,7 @@ namespace DcimIngester
             }
         }
 
-        private void MenuItemAbout_Click(object sender, RoutedEventArgs e)
+        private void AboutMenuItem_Click(object sender, RoutedEventArgs e)
         {
             FileVersionInfo versionInfo = FileVersionInfo.GetVersionInfo(Assembly.GetEntryAssembly()!.Location);
 
@@ -78,7 +79,7 @@ namespace DcimIngester
             });
         }
 
-        private void MenuItemExit_Click(object sender, RoutedEventArgs e)
+        private void ExitMenuItem_Click(object sender, RoutedEventArgs e)
         {
             if (mainWindow!.ActiveIngestCount == 0)
             {

@@ -13,12 +13,12 @@
                 <ColumnDefinition Width="26"/>
             </Grid.ColumnDefinitions>
 
-            <TextBox x:Name="TextBoxDestDir" IsReadOnly="True" TextChanged="TextBoxDestDir_TextChanged"/>
-            <Button x:Name="ButtonBrowseDest" Content="..." Click="ButtonBrowseDest_Click" Grid.Column="2"/>
+            <TextBox x:Name="destinationTextBox" IsReadOnly="True" TextChanged="DestinationTextBox_TextChanged"/>
+            <Button Content="..." Click="SelectDestButton_Click" Grid.Column="2"/>
         </Grid>
 
         <TextBlock Text="File Organisation" Margin="0,10,0,5"/>
-        <ComboBox x:Name="ComboBoxDestStruc" SelectionChanged="ComboBoxDestStruc_SelectionChanged">
+        <ComboBox x:Name="structureComboBox" SelectionChanged="StructureComboBox_SelectionChanged">
             <ComboBox.Items>
                 <ComboBoxItem Content="Destination\YYYY\MM\DD"/>
                 <ComboBoxItem Content="Destination\YYYY\YYYY-MM-DD"/>
@@ -26,7 +26,7 @@
             </ComboBox.Items>
         </ComboBox>
 
-        <CheckBox x:Name="CheckBoxDelete" Content="Delete original files after ingest" Margin="-1,13,0,0" Checked="CheckBoxDelete_CheckedChanged" Unchecked="CheckBoxDelete_CheckedChanged"/>
+        <CheckBox x:Name="deleteCheckBox" Content="Delete original files after ingest" Margin="-1,13,0,0" Checked="DeleteCheckBox_CheckedChanged" Unchecked="DeleteCheckBox_CheckedChanged"/>
 
         <Grid Margin="0,20,0,0">
             <Grid.ColumnDefinitions>
@@ -36,8 +36,8 @@
                 <ColumnDefinition Width="80"/>
             </Grid.ColumnDefinitions>
 
-            <Button x:Name="ButtonSave" Content="Save" FontWeight="Bold" Click="ButtonSave_Click" Grid.Column="1"/>
-            <Button x:Name="ButtonCancel" Content="Cancel" Click="ButtonCancel_Click" IsCancel="True" Grid.Column="3"/>
+            <Button x:Name="saveButton" Content="Save" FontWeight="Bold" Click="SaveButton_Click" Grid.Column="1"/>
+            <Button Content="Cancel" Click="CancelButton_Click" IsCancel="True" Grid.Column="3"/>
         </Grid>
     </StackPanel>
 </Window>

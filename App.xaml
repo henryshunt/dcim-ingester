@@ -5,11 +5,11 @@
              Startup="Application_Startup" ShutdownMode="OnExplicitShutdown">
 
     <Application.Resources>
-        <ContextMenu x:Key="TaskbarIconContextMenu">
-            <MenuItem Header="Settings" Click="MenuItemSettings_Click"/>
+        <ContextMenu x:Key="TrayContextMenu">
+            <MenuItem Header="Settings" Click="SettingsMenuItem_Click"/>
             <Separator/>
-            <MenuItem Header="About" Click="MenuItemAbout_Click"/>
-            <MenuItem Header="Exit" Click="MenuItemExit_Click"/>
+            <MenuItem Header="About" Click="AboutMenuItem_Click"/>
+            <MenuItem Header="Exit" Click="ExitMenuItem_Click"/>
         </ContextMenu>
 
         

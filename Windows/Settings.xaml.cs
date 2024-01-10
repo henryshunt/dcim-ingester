@@ -13,30 +13,30 @@ namespace DcimIngester.Windows
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
-            TextBoxDestDir.Text = Properties.Settings.Default.DestDirectory;
-            ComboBoxDestStruc.SelectedIndex = Properties.Settings.Default.DestStructure;
-            CheckBoxDelete.IsChecked = Properties.Settings.Default.DeleteAfterIngest;
+            destinationTextBox.Text = Properties.Settings.Default.DestDirectory;
+            structureComboBox.SelectedIndex = Properties.Settings.Default.DestStructure;
+            deleteCheckBox.IsChecked = Properties.Settings.Default.DeleteAfterIngest;
         }
 
-        private void TextBoxDestDir_TextChanged(object sender, TextChangedEventArgs e)
+        private void DestinationTextBox_TextChanged(object sender, TextChangedEventArgs e)
         {
             ValidateFields();
         }
 
-        private void ButtonBrowseDest_Click(object sender, RoutedEventArgs e)
+        private void SelectDestButton_Click(object sender, RoutedEventArgs e)
         {
             OpenFolderDialog dialog = new();
 
             if (dialog.ShowDialog() == true)
-                TextBoxDestDir.Text = dialog.FolderName;
+                destinationTextBox.Text = dialog.FolderName;
         }
 
-        private void ComboBoxDestStruc_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        private void StructureComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             ValidateFields();
         }
 
-        private void CheckBoxDelete_CheckedChanged(object sender, RoutedEventArgs e)
+        private void DeleteCheckBox_CheckedChanged(object sender, RoutedEventArgs e)
         {
             ValidateFields();
         }
@@ -46,27 +46,27 @@ namespace DcimIngester.Windows
         /// </summary>
         private void ValidateFields()
         {
-            if ((TextBoxDestDir.Text.Length > 0 &&
-                TextBoxDestDir.Text != Properties.Settings.Default.DestDirectory) ||
-                ComboBoxDestStruc.SelectedIndex != Properties.Settings.Default.DestStructure ||
-                CheckBoxDelete.IsChecked != Properties.Settings.Default.DeleteAfterIngest)
+            if ((destinationTextBox.Text.Length > 0 &&
+                destinationTextBox.Text != Properties.Settings.Default.DestDirectory) ||
+                structureComboBox.SelectedIndex != Properties.Settings.Default.DestStructure ||
+                deleteCheckBox.IsChecked != Properties.Settings.Default.DeleteAfterIngest)
             {
-                ButtonSave.IsEnabled = true;
+                saveButton.IsEnabled = true;
             }
-            else ButtonSave.IsEnabled = false;
+            else saveButton.IsEnabled = false;
         }
 
-        private void ButtonSave_Click(object sender, RoutedEventArgs e)
+        private void SaveButton_Click(object sender, RoutedEventArgs e)
         {
-            Properties.Settings.Default.DestDirectory = TextBoxDestDir.Text;
-            Properties.Settings.Default.DestStructure = ComboBoxDestStruc.SelectedIndex;
-            Properties.Settings.Default.DeleteAfterIngest = (bool)CheckBoxDelete.IsChecked!;
+            Properties.Settings.Default.DestDirectory = destinationTextBox.Text;
+            Properties.Settings.Default.DestStructure = structureComboBox.SelectedIndex;
+            Properties.Settings.Default.DeleteAfterIngest = (bool)deleteCheckBox.IsChecked!;
             Properties.Settings.Default.Save();
 
             Close();
         }
 
-        private void ButtonCancel_Click(object sender, RoutedEventArgs e)
+        private void CancelButton_Click(object sender, RoutedEventArgs e)
         {
             Close();
         }

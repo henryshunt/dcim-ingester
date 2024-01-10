@@ -67,8 +67,8 @@
 
     <Border Background="#FF1C1C1C" BorderThickness="1" BorderBrush="#FF525252" CornerRadius="8">
         <Grid Margin="15">
-            <Grid x:Name="GridPrompt">
-                <TextBlock x:Name="TextPrompt" TextWrapping="Wrap" VerticalAlignment="Top"/>
+            <Grid x:Name="promptGrid">
+                <TextBlock x:Name="promptText" TextWrapping="Wrap" VerticalAlignment="Top"/>
 
                 <Grid VerticalAlignment="Bottom">
                     <Grid.ColumnDefinitions>
@@ -77,15 +77,15 @@
                         <ColumnDefinition/>
                     </Grid.ColumnDefinitions>
 
-                    <Button x:Name="ButtonPromptStart" Style="{DynamicResource NotifButtonStyle}" Content="Ingest Files" Click="ButtonPromptStart_Click"/>
-                    <Button x:Name="ButtonPromptDismiss" Style="{DynamicResource NotifButtonStyle}" Content="Dismiss" Click="ButtonDismiss_Click" Grid.Column="2"/>
+                    <Button Style="{DynamicResource NotifButtonStyle}" Content="Ingest Files" Click="StartIngestButton_Click"/>
+                    <Button Style="{DynamicResource NotifButtonStyle}" Content="Dismiss" Click="DismissIngestButton_Click" Grid.Column="2"/>
                 </Grid>
             </Grid>
 
-            <Grid x:Name="GridIngest" Visibility="Collapsed">
+            <Grid x:Name="ingestGrid" Visibility="Collapsed">
                 <StackPanel VerticalAlignment="Top">
-                    <TextBlock x:Name="TextIngest1" VerticalAlignment="Top"/>
-                    <ProgressBar x:Name="ProgressBar1" Height="5" Margin="0,8,0,0" VerticalAlignment="Top" Background="#FF494949" Foreground="#FF0078D4" BorderThickness="0"/>
+                    <TextBlock x:Name="ingestText1" VerticalAlignment="Top"/>
+                    <ProgressBar x:Name="theProgressBar" Height="5" Margin="0,8,0,0" VerticalAlignment="Top" Background="#FF494949" Foreground="#FF0078D4" BorderThickness="0"/>
 
                     <Grid Margin="0,8,0,0">
                         <Grid.ColumnDefinitions>
@@ -94,23 +94,23 @@
                             <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
 
-                        <TextBlock x:Name="TextIngest2" VerticalAlignment="Top" Foreground="#FFCBCBCB"/>
-                        <TextBlock x:Name="TextIngestPercent" Text="0%" Foreground="#FFCBCBCB" Grid.Column="2"/>
+                        <TextBlock x:Name="ingestText2" VerticalAlignment="Top" Foreground="#FFCBCBCB"/>
+                        <TextBlock x:Name="ingestPercentText" Text="0%" Foreground="#FFCBCBCB" Grid.Column="2"/>
                     </Grid>
                 </StackPanel>
 
-                <Button x:Name="ButtonIngestCancel" Style="{DynamicResource NotifButtonStyle}" Content="Cancel" Click="ButtonIngestCancel_Click" VerticalAlignment="Bottom"/>
+                <Button x:Name="cancelIngestButton" Style="{DynamicResource NotifButtonStyle}" Content="Cancel" Click="CancelIngestButton_Click" VerticalAlignment="Bottom"/>
 
-                <Grid x:Name="GridIngestButtons" VerticalAlignment="Bottom" Visibility="Collapsed">
+                <Grid x:Name="ingestButtonsGrid" VerticalAlignment="Bottom" Visibility="Collapsed">
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition x:Name="ColDefIngestRetry" Width="0"/>
-                        <ColumnDefinition x:Name="ColDefIngestOpen" Width="0"/>
+                        <ColumnDefinition x:Name="retryIngestColDef" Width="0"/>
+                        <ColumnDefinition x:Name="openFolderColDef" Width="0"/>
                         <ColumnDefinition/>
                     </Grid.ColumnDefinitions>
 
-                    <Button x:Name="ButtonIngestRetry" Style="{DynamicResource NotifButtonStyle}" Content="Retry" Margin="0,0,8,0" Click="ButtonIngestRetry_Click" Visibility="Collapsed"/>
-                    <Button x:Name="ButtonIngestOpen" Style="{DynamicResource NotifButtonStyle}" Content="Open Folder" Margin="0,0,8,0" Click="ButtonIngestOpen_Click" Visibility="Collapsed" Grid.Column="1"/>
-                    <Button x:Name="ButtonIngestDismiss" Style="{DynamicResource NotifButtonStyle}" Content="Dismiss" Click="ButtonDismiss_Click" Grid.Column="2"/>
+                    <Button x:Name="retryIngestButton" Style="{DynamicResource NotifButtonStyle}" Content="Retry" Margin="0,0,8,0" Click="RetryIngestButton_Click" Visibility="Collapsed"/>
+                    <Button x:Name="openFolderButton" Style="{DynamicResource NotifButtonStyle}" Content="Open Folder" Margin="0,0,8,0" Click="OpenFolderButton_Click" Visibility="Collapsed" Grid.Column="1"/>
+                    <Button Style="{DynamicResource NotifButtonStyle}" Content="Dismiss" Click="DismissIngestButton_Click" Grid.Column="2"/>
                 </Grid>
             </Grid>
         </Grid>

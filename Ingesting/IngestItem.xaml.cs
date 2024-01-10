@@ -68,21 +68,21 @@ namespace DcimIngester.Controls
 
         private void UserControl_Loaded(object sender, RoutedEventArgs e)
         {
-            TextPrompt.Text = string.Format(
+            promptText.Text = string.Format(
                 "{0} ({1}:) has {2} file{3} ({4}) in DCIM. Do you want to ingest them?",
                 task.Work.VolumeLabel, task.Work.VolumeLetter, task.Work.FilesToIngest.Count,
                 GetPluralSuffix(task.Work.FilesToIngest.Count),
                 FormatStorageSize(task.Work.TotalIngestSize));
         }
 
-        private void ButtonPromptStart_Click(object sender, RoutedEventArgs e)
+        private void StartIngestButton_Click(object sender, RoutedEventArgs e)
         {
             task.DestinationDirectory = Properties.Settings.Default.DestDirectory;
             task.DestinationStructure = (DestStructure)Properties.Settings.Default.DestStructure;
             task.DeleteAfterIngest = Properties.Settings.Default.DeleteAfterIngest!;
 
-            GridPrompt.Visibility = Visibility.Collapsed;
-            GridIngest.Visibility = Visibility.Visible;
+            promptGrid.Visibility = Visibility.Collapsed;
+            ingestGrid.Visibility = Visibility.Visible;
 
             Ingest();
         }
@@ -92,54 +92,54 @@ namespace DcimIngester.Controls
         /// </summary>
         private async void Ingest()
         {
-            TextIngest1.Text = string.Format("Ingesting {0} file{1} from {2} ({3}:)",
+            ingestText1.Text = string.Format("Ingesting {0} file{1} from {2} ({3}:)",
                 task.Work.FilesToIngest.Count, GetPluralSuffix(task.Work.FilesToIngest.Count),
                 task.Work.VolumeLabel, task.Work.VolumeLetter);
 
             // Restore UI in case we are retrying after a failure
-            ProgressBar1.Foreground = new SolidColorBrush(Color.FromRgb(0, 120, 212));
-            ButtonIngestCancel.Visibility = Visibility.Visible;
-            ButtonIngestCancel.IsEnabled = true;
-            GridIngestButtons.Visibility = Visibility.Collapsed;
-            ButtonIngestRetry.Visibility = Visibility.Collapsed;
-            ColDefIngestRetry.Width = new GridLength(0, GridUnitType.Pixel);
-            ButtonIngestOpen.Visibility = Visibility.Collapsed;
-            ColDefIngestOpen.Width = new GridLength(0, GridUnitType.Pixel);
+            theProgressBar.Foreground = new SolidColorBrush(Color.FromRgb(0, 120, 212));
+            cancelIngestButton.Visibility = Visibility.Visible;
+            cancelIngestButton.IsEnabled = true;
+            ingestButtonsGrid.Visibility = Visibility.Collapsed;
+            retryIngestButton.Visibility = Visibility.Collapsed;
+            retryIngestColDef.Width = new GridLength(0, GridUnitType.Pixel);
+            openFolderButton.Visibility = Visibility.Collapsed;
+            openFolderColDef.Width = new GridLength(0, GridUnitType.Pixel);
 
             try
             {
                 await task.Ingest(cancelSource.Token);
 
-                TextIngest1.Text = string.Format("Ingest from {0} ({1}:) completed",
+                ingestText1.Text = string.Format("Ingest from {0} ({1}:) completed",
                     task.Work.VolumeLabel, task.Work.VolumeLetter);
             }
             catch (OperationCanceledException)
             {
-                TextIngest1.Text = string.Format("Ingest from {0} ({1}:) cancelled",
+                ingestText1.Text = string.Format("Ingest from {0} ({1}:) cancelled",
                     task.Work.VolumeLabel, task.Work.VolumeLetter);
-                ProgressBar1.Foreground = new SolidColorBrush(Color.FromRgb(255, 140, 0));
+                theProgressBar.Foreground = new SolidColorBrush(Color.FromRgb(255, 140, 0));
             }
             catch
             {
-                TextIngest1.Text = string.Format("Ingest from {0} ({1}:) failed",
+                ingestText1.Text = string.Format("Ingest from {0} ({1}:) failed",
                     task.Work.VolumeLabel, task.Work.VolumeLetter);
-                ProgressBar1.Foreground = new SolidColorBrush(Color.FromRgb(209, 52, 56));
-                ButtonIngestRetry.Visibility = Visibility.Visible;
-                ColDefIngestRetry.Width = new GridLength(1, GridUnitType.Star);
+                theProgressBar.Foreground = new SolidColorBrush(Color.FromRgb(209, 52, 56));
+                retryIngestButton.Visibility = Visibility.Visible;
+                retryIngestColDef.Width = new GridLength(1, GridUnitType.Star);
             }
             finally
             {
-                TextIngest2.Text = string.Format("Transferred {0} file{1}",
+                ingestText2.Text = string.Format("Transferred {0} file{1}",
                     ingestedCount, GetPluralSuffix(ingestedCount));
             }
 
-            ButtonIngestCancel.Visibility = Visibility.Collapsed;
-            GridIngestButtons.Visibility = Visibility.Visible;
+            cancelIngestButton.Visibility = Visibility.Collapsed;
+            ingestButtonsGrid.Visibility = Visibility.Visible;
 
             if (firstIngestDir != null)
             {
-                ButtonIngestOpen.Visibility = Visibility.Visible;
-                ColDefIngestOpen.Width = new GridLength(1, GridUnitType.Star);
+                openFolderButton.Visibility = Visibility.Visible;
+                openFolderColDef.Width = new GridLength(1, GridUnitType.Star);
             }
         }
 
@@ -147,7 +147,7 @@ namespace DcimIngester.Controls
         {
             Application.Current.Dispatcher.Invoke(() =>
             {
-                TextIngest2.Text = string.Format("Transferring {0}",
+                ingestText2.Text = string.Format("Transferring {0}",
                     Path.GetFileName(task.Work.FilesToIngest.ElementAt(e.FileIndex)));
             });
         }
@@ -163,27 +163,27 @@ namespace DcimIngester.Controls
 
             Application.Current.Dispatcher.Invoke(() =>
             {
-                TextIngestPercent.Text = string.Format("{0}%", Math.Round(percentage));
-                ProgressBar1.Value = percentage;
+                ingestPercentText.Text = string.Format("{0}%", Math.Round(percentage));
+                theProgressBar.Value = percentage;
             });
         }
 
-        private void ButtonIngestCancel_Click(object sender, RoutedEventArgs e)
+        private void CancelIngestButton_Click(object sender, RoutedEventArgs e)
         {
             if (!cancelSource.IsCancellationRequested)
             {
-                ButtonIngestCancel.Content = "Cancelling...";
-                ButtonIngestCancel.IsEnabled = false;
+                cancelIngestButton.Content = "Cancelling...";
+                cancelIngestButton.IsEnabled = false;
                 cancelSource.Cancel();
             }
         }
 
-        private void ButtonIngestRetry_Click(object sender, RoutedEventArgs e)
+        private void RetryIngestButton_Click(object sender, RoutedEventArgs e)
         {
             Ingest();
         }
 
-        private void ButtonIngestOpen_Click(object sender, RoutedEventArgs e)
+        private void OpenFolderButton_Click(object sender, RoutedEventArgs e)
         {
             ProcessStartInfo psi = new(firstIngestDir!)
             {
@@ -198,7 +198,7 @@ namespace DcimIngester.Controls
             catch { }
         }
 
-        private void ButtonDismiss_Click(object sender, RoutedEventArgs e)
+        private void DismissIngestButton_Click(object sender, RoutedEventArgs e)
         {
             Dismissed?.Invoke(this, new EventArgs());
         }
