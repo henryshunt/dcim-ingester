@@ -31,13 +31,16 @@
         <Grid Margin="0,20,0,0">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="10"/>
                 <ColumnDefinition Width="100"/>
                 <ColumnDefinition Width="8"/>
                 <ColumnDefinition Width="80"/>
             </Grid.ColumnDefinitions>
 
-            <Button x:Name="saveButton" Content="Save" FontWeight="Bold" Click="SaveButton_Click" Grid.Column="1"/>
-            <Button Content="Cancel" Click="CancelButton_Click" IsCancel="True" Grid.Column="3"/>
+            <TextBlock x:Name="versionText" VerticalAlignment="Center" HorizontalAlignment="Right" Grid.Column="1"/>
+            <Button x:Name="saveButton" Content="Save" FontWeight="Bold" Click="SaveButton_Click" Grid.Column="3"/>
+            <Button Content="Cancel" Click="CancelButton_Click" IsCancel="True" Grid.Column="5"/>
         </Grid>
     </StackPanel>
 </Window>

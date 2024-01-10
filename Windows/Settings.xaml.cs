@@ -1,4 +1,6 @@
 ﻿using Microsoft.Win32;
+using System.Diagnostics;
+using System.Reflection;
 using System.Windows;
 using System.Windows.Controls;
 
@@ -16,6 +18,10 @@ namespace DcimIngester.Windows
             destinationTextBox.Text = Properties.Settings.Default.DestDirectory;
             structureComboBox.SelectedIndex = Properties.Settings.Default.DestStructure;
             deleteCheckBox.IsChecked = Properties.Settings.Default.DeleteAfterIngest;
+
+            FileVersionInfo versionInfo = FileVersionInfo.GetVersionInfo(Assembly.GetEntryAssembly()!.Location);
+            versionText.Text = string.Format("V{0}.{1}.{2}",
+                versionInfo.ProductMajorPart, versionInfo.ProductMinorPart, versionInfo.ProductBuildPart);
         }
 
         private void DestinationTextBox_TextChanged(object sender, TextChangedEventArgs e)

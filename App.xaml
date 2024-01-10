@@ -7,8 +7,6 @@
     <Application.Resources>
         <ContextMenu x:Key="TrayContextMenu">
             <MenuItem Header="Settings" Click="SettingsMenuItem_Click"/>
-            <Separator/>
-            <MenuItem Header="About" Click="AboutMenuItem_Click"/>
             <MenuItem Header="Exit" Click="ExitMenuItem_Click"/>
         </ContextMenu>
 

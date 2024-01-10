@@ -1,10 +1,8 @@
 ﻿using DcimIngester.Windows;
 using Hardcodet.Wpf.TaskbarNotification;
 using System;
-using System.Diagnostics;
 using System.Drawing;
 using System.IO;
-using System.Reflection;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -15,8 +13,7 @@ namespace DcimIngester
     {
         private TaskbarIcon? taskbarIcon = null;
         private MainWindow? mainWindow = null;
-
-        private bool isSettingsOpen = false;
+        private Settings? settingsWindow = null;
 
 
         private void Application_Startup(object sender, StartupEventArgs e)
@@ -52,31 +49,13 @@ namespace DcimIngester
 
         private void SettingsMenuItem_Click(object sender, RoutedEventArgs e)
         {
-            if (!isSettingsOpen)
+            if (settingsWindow == null)
             {
-                isSettingsOpen = true;
-
-                // Disable Settings item in context menu
-                ((MenuItem)taskbarIcon!.ContextMenu.Items[0]).IsEnabled = false;
-
-                new Settings().Show();
-                ((MenuItem)taskbarIcon!.ContextMenu.Items[0]).IsEnabled = true;
-                isSettingsOpen = false;
+                settingsWindow = new Settings();
+                settingsWindow.Closed += (sender, e) => settingsWindow = null;
+                settingsWindow.Show();
             }
-        }
-
-        private void AboutMenuItem_Click(object sender, RoutedEventArgs e)
-        {
-            FileVersionInfo versionInfo = FileVersionInfo.GetVersionInfo(Assembly.GetEntryAssembly()!.Location);
-
-            string versionString = string.Format("{0} V{1}. Created by {2}.",
-                versionInfo.ProductName, versionInfo.FileVersion, versionInfo.CompanyName);
-
-            Task.Run(() =>
-            {
-                MessageBox.Show(versionString, "DCIM Ingester", MessageBoxButton.OK, MessageBoxImage.None,
-                    MessageBoxResult.OK, MessageBoxOptions.DefaultDesktopOnly);
-            });
+            else settingsWindow.Focus();
         }
 
         private void ExitMenuItem_Click(object sender, RoutedEventArgs e)
@@ -90,6 +69,7 @@ namespace DcimIngester
             }
             else
             {
+                // MessageBox immediately closes without using Task
                 Task.Run(() =>
                 {
                     MessageBox.Show("Wait for ingests to finish before exiting.", "DCIM Ingester",
