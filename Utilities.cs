@@ -6,16 +6,6 @@ namespace DcimIngester
     public static class Utilities
     {
         /// <summary>
-        /// Returns "s" or <see cref="string.Empty"/> depending on if a number is singular or plural.
-        /// </summary>
-        /// <param name="number">The number to use.</param>
-        /// <returns>The corresponding suffix for the value of <paramref name="number"/>.</returns>
-        public static string GetPluralSuffix(int number)
-        {
-            return number != 1 ? "s" : string.Empty;
-        }
-
-        /// <summary>
         /// Formats a numerical storage size into a string with units based on the magnitude of the value.
         /// </summary>
         /// <param name="bytes">The storage size in bytes.</param>
@@ -72,6 +62,16 @@ namespace DcimIngester
             }
 
             return true;
+        }
+
+        /// <summary>
+        /// Returns "s" or <see cref="string.Empty"/> depending on if a number is singular or plural.
+        /// </summary>
+        /// <param name="number">The number to use.</param>
+        /// <returns>The corresponding suffix for the value of <paramref name="number"/>.</returns>
+        public static string GetPluralSuffix(int number)
+        {
+            return number != 1 ? "s" : string.Empty;
         }
     }
 }
