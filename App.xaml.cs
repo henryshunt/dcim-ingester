@@ -60,22 +60,31 @@ namespace DcimIngester
 
         private void ExitMenuItem_Click(object sender, RoutedEventArgs e)
         {
-            if (mainWindow!.ActiveIngestCount == 0)
+            if (mainWindow!.ActiveIngestCount > 0)
+            {
+                // MessageBox immediately closes without using Task
+                Task.Run(() =>
+                {
+                    if (MessageBox.Show("There are ingests in progress. Are you sure you want to exit?",
+                        "DCIM Ingester", MessageBoxButton.YesNo, MessageBoxImage.Exclamation, MessageBoxResult.OK,
+                        MessageBoxOptions.DefaultDesktopOnly) == MessageBoxResult.Yes)
+                    {
+                        Dispatcher.Invoke(() =>
+                        {
+                            // Icon stays visible after shutdown (until hovered over) without this
+                            taskbarIcon!.Visibility = Visibility.Collapsed;
+
+                            Shutdown();
+                        });
+                    }
+                });
+            }
+            else
             {
                 // Icon stays visible after shutdown (until hovered over) without this
                 taskbarIcon!.Visibility = Visibility.Collapsed;
 
                 Shutdown();
-            }
-            else
-            {
-                // MessageBox immediately closes without using Task
-                Task.Run(() =>
-                {
-                    MessageBox.Show("Wait for ingests to finish before exiting.", "DCIM Ingester",
-                        MessageBoxButton.OK, MessageBoxImage.Exclamation, MessageBoxResult.OK,
-                        MessageBoxOptions.DefaultDesktopOnly);
-                });
             }
         }
     }
