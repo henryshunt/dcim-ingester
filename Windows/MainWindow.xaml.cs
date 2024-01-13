@@ -11,6 +11,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Interop;
 using static DcimIngester.Ingesting.IngestTask;
+using static DcimIngester.Utilities;
 
 namespace DcimIngester.Windows
 {
@@ -43,7 +44,11 @@ namespace DcimIngester.Windows
         /// <summary>
         /// Gets the number of <see cref="IngestItem"/>s that are currently actively ingesting.
         /// </summary>
-        public int ActiveIngestCount => GetActiveIngestCount();
+        public int ActiveIngestCount
+        {
+            get => itemsStackPanel.Children.OfType<IngestItem>().Count(
+                i => i.Status == IngestTaskStatus.Ingesting);
+        }
 
 
         /// <summary>
@@ -103,28 +108,6 @@ namespace DcimIngester.Windows
                 NativeMethods.SHChangeNotifyDeregister(notifyId);
                 SystemEvents.DisplaySettingsChanged -= SystemEvents_DisplaySettingsChanged;
             }
-        }
-
-        /// <summary>
-        /// Hides the window from the Alt+Tab task switcher.
-        /// </summary>
-        /// <param name="windowHandle">The handle of the window.</param>
-        /// <returns><see langword="true"/> on success, otherwise <see langword="false"/>.</returns>
-        private static bool HideWindowFromAltTab(IntPtr windowHandle)
-        {
-            int extendedStyle = NativeMethods.GetWindowLongPtr(windowHandle, NativeMethods.GWL_EXSTYLE);
-
-            if (extendedStyle != 0)
-            {
-                extendedStyle |= NativeMethods.WS_EX_TOOLWINDOW;
-
-                if (NativeMethods.SetWindowLongPtr(windowHandle, NativeMethods.GWL_EXSTYLE, extendedStyle) != 0)
-                {
-                    return true;
-                }
-            }
-
-            return false;
         }
 
         /// <summary>
@@ -239,7 +222,9 @@ namespace DcimIngester.Windows
                             itemsStackPanel.Children.Add(item);
 
                             Left = SystemParameters.WorkArea.Right - Width - WINDOW_MARGIN_X;
+                            Height = itemsStackPanel.Children.OfType<IngestItem>().Sum(i => i.Height + i.Margin.Top);
                             Top = SystemParameters.WorkArea.Bottom - Height - WINDOW_MARGIN_Y;
+
                             Show();
                         });
                     }
@@ -273,7 +258,11 @@ namespace DcimIngester.Windows
         {
             itemsStackPanel.Children.Remove(item);
 
+            if (itemsStackPanel.Children.Count > 0)
+                ((IngestItem)itemsStackPanel.Children[0]).Margin = new Thickness(0);
+
             Left = SystemParameters.WorkArea.Right - Width - WINDOW_MARGIN_X;
+            Height = itemsStackPanel.Children.OfType<IngestItem>().Sum(i => i.Height + i.Margin.Top);
             Top = SystemParameters.WorkArea.Bottom - Height - WINDOW_MARGIN_Y;
 
             if (itemsStackPanel.Children.Count == 0)
@@ -286,15 +275,6 @@ namespace DcimIngester.Windows
             // item being dismissed between the dismiss button being clicked and this code executing
             if (itemsStackPanel.Children.Contains((IngestItem)sender!))
                 RemoveItem((IngestItem)sender!);
-        }
-
-        /// <summary>
-        /// Returns the number of <see cref="IngestItem"/>s that are currently actively ingesting.
-        /// </summary>
-        private int GetActiveIngestCount()
-        {
-            return itemsStackPanel.Children.OfType<IngestItem>().Count(
-                i => i.Status == IngestTaskStatus.Ingesting);
         }
 
         /// <summary>

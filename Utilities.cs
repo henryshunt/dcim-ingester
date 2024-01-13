@@ -6,6 +6,28 @@ namespace DcimIngester
     public static class Utilities
     {
         /// <summary>
+        /// Hides a window from the Alt+Tab task switcher.
+        /// </summary>
+        /// <param name="windowHandle">The handle of the window.</param>
+        /// <returns><see langword="true"/> on success, otherwise <see langword="false"/>.</returns>
+        public static bool HideWindowFromAltTab(IntPtr windowHandle)
+        {
+            int extendedStyle = NativeMethods.GetWindowLongPtr(windowHandle, NativeMethods.GWL_EXSTYLE);
+
+            if (extendedStyle != 0)
+            {
+                extendedStyle |= NativeMethods.WS_EX_TOOLWINDOW;
+
+                if (NativeMethods.SetWindowLongPtr(windowHandle, NativeMethods.GWL_EXSTYLE, extendedStyle) != 0)
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        /// <summary>
         /// Formats a numerical storage size into a string with units based on the magnitude of the value.
         /// </summary>
         /// <param name="bytes">The storage size in bytes.</param>
