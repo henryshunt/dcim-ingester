@@ -75,6 +75,6 @@ namespace DcimIngester
 
         [DllImport("shell32.dll", CharSet = CharSet.Auto)]
         [return: MarshalAs(UnmanagedType.Bool)]
-        public static extern bool SHGetPathFromIDListW(IntPtr pidl, [MarshalAs(UnmanagedType.LPTStr)] StringBuilder pszPath);
+        public static extern bool SHGetPathFromIDListW(IntPtr pidl, [MarshalAs(UnmanagedType.LPWStr)] StringBuilder pszPath);
     }
 }
