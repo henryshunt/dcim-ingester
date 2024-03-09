@@ -48,4 +48,4 @@ A simple system tray application that ingests images from SD cards and sorts the
 	- On first run, the destination directory defaults to the Pictures folder instead of being left unset
 	- Removed custom UI styling from the Settings window
 	- Changed from preventing application exit while ingests are in progress to allowing such with a confirmation dialog
-	- Upgraded to .NET 8#
+	- Upgraded to .NET 8
